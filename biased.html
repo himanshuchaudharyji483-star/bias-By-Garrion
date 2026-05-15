@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <title>Garrion Bias | Full Intermarket Matrix</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: radial-gradient(ellipse at 30% 20%, #0b0e16, #020408);
+            font-family: 'Inter', sans-serif;
+            color: #eef2ff;
+            padding: 1.2rem;
+            min-height: 100vh;
+        }
+        .app-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(8, 11, 20, 0.7);
+            backdrop-filter: blur(18px);
+            border-radius: 2.2rem;
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            box-shadow: 0 30px 45px -15px rgba(0,0,0,0.8);
+            overflow: hidden;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(0,0,0,0.5);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.4);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .logo {
+            font-size: 1.9rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f5e7b2, #d4af37, #b8860b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .logo span { font-size: 1.6rem; margin-right: 6px; }
+        .nav-links {
+            display: flex;
+            gap: 0.7rem;
+            flex-wrap: wrap;
+        }
+        .nav-btn {
+            background: #1e293b80;
+            border-radius: 2rem;
+            padding: 0.5rem 1.2rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid transparent;
+        }
+        .nav-btn.active {
+            background: #2d3a5e;
+            border-color: #d4af37;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+        }
+        .nav-btn:hover { transform: translateY(-2px); background: #3a4a6e; }
+        .content-area {
+            padding: 2rem;
+            min-height: 560px;
+            transition: all 0.2s ease;
+        }
+        .premium-card {
+            background: #0f172ad9;
+            border-radius: 1.6rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #2a3650;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.1s;
+        }
+        .premium-card:hover { transform: translateY(-3px); box-shadow: 0 15px 25px -12px rgba(0,0,0,0.5); }
+        .premium-card:active { border-color: #d4af37; }
+        .btn {
+            background: #1f2a44;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.6rem 1.4rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+        }
+        .btn-gold {
+            background: linear-gradient(115deg, #b8860b, #d4af37);
+            box-shadow: 0 4px 12px rgba(212,175,55,0.3);
+            color: #0a0c12;
+        }
+        .btn-gold:hover { transform: translateY(-2px); filter: brightness(1.05); }
+        .btn-outline { background: transparent; border: 1px solid #d4af37; }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+        }
+        input, select {
+            background: #0b1020;
+            border: 1px solid #2c3e50;
+            border-radius: 1rem;
+            padding: 0.7rem 1rem;
+            color: #f1f5f9;
+            width: 100%;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        input:focus, select:focus { border-color: #d4af37; outline: none; }
+        .signal-box {
+            background: #0b1120dd;
+            border-radius: 1.2rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 5px solid;
+            transition: all 0.2s;
+        }
+        .signal-strong-buy { border-left-color: #10b981; background: linear-gradient(115deg, #0a2e2420, #0b1120); }
+        .signal-buy { border-left-color: #2dd4bf; }
+        .signal-strong-sell { border-left-color: #f43f5e; background: linear-gradient(115deg, #3b0f1c20, #0b1120); }
+        .signal-sell { border-left-color: #fb923c; }
+        .signal-wait { border-left-color: #facc15; background: #1e1a2e30; }
+        .indicator-summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        .summary-chip {
+            background: #0f172a;
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-left: 2px solid #d4af37;
+        }
+        .arrow-up { color: #10b981; }
+        .arrow-down { color: #ef4444; }
+        .arrow-side { color: #facc15; }
+        .history-entry {
+            background: #0f1422aa;
+            border-radius: 1.2rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #2d3a5e;
+        }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in { animation: fadeSlide 0.3s ease-out; }
+        @keyframes saveFlash {
+            0% { background-color: #d4af3730; }
+            100% { background-color: transparent; }
+        }
+        .flash-save { animation: saveFlash 0.6s ease; }
+        @media (max-width: 640px) {
+            .content-area { padding: 1rem; }
+            .header { padding: 0.8rem 1rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-wrapper">
+    <div class="header">
+        <div class="logo"><span>⚡</span> GARRION BIAS</div>
+        <div class="nav-links" id="navLinks" style="display: none;">
+            <div class="nav-btn" data-nav="home">🏠 Home</div>
+            <div class="nav-btn" data-nav="news">📰 News</div>
+            <div class="nav-btn" data-nav="indicators">📊 Indicators</div>
+            <div class="nav-btn" data-nav="signals">🎯 Signals</div>
+            <div class="nav-btn" data-nav="history">📜 History</div>
+        </div>
+    </div>
+    <div class="content-area" id="contentArea"></div>
+</div>
+
+<script>
+    // ---------- PERSISTENCE ----------
+    const STORAGE_KEY = "garrion_final_v5";
+    const HISTORY_KEY = "garrion_history_final";
+
+    let state = {
+        currentScreen: "home",
+        news: [],
+        boe: "neutral",
+        boj: "neutral",
+        dxy: { price: "", ema20: "", ema50: "", prevOpen: "", prevHigh: "", prevLow: "", prevClose: "", trend1h: "side" },
+        spx: { price: "", ema20: "", ema50: "", prevOpen: "", prevHigh: "", prevLow: "", prevClose: "" },
+        us10y: { price: "", ema20: "", ema50: "", prevOpen: "", prevHigh: "", prevLow: "", prevClose: "" },
+        btcd: { price: "", ema20: "", ema50: "", prevOpen: "", prevHigh: "", prevLow: "", prevClose: "" },
+        vix: { level: "<15" },
+        indicatorStep: 0,
+        history: []
+    };
+
+    function loadSession() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            try {
+                const p = JSON.parse(saved);
+                Object.assign(state, p);
+                if (!state.news) state.news = [];
+                if (!state.dxy) state.dxy = { price: "", ema20: "", ema50: "", prevOpen: "", prevHigh: "", prevLow: "", prevClose: "", trend1h: "side" };
+                if (!state.spx) state.spx = { price: "", ema20: "", ema50: "", prevOpen: "", prevHigh: "", prevLow: "", prevClose: "" };
+                if (!state.us10y) state.us10y = { price: "", ema20: "", ema50: "", prevOpen: "", prevHigh: "", prevLow: "", prevClose: "" };
+                if (!state.btcd) state.btcd = { price: "", ema20: "", ema50: "", prevOpen: "", prevHigh: "", prevLow: "", prevClose: "" };
+                if (!state.vix) state.vix = { level: "<15" };
+                if (state.indicatorStep === undefined) state.indicatorStep = 0;
+            } catch(e) {}
+        }
+        const storedHistory = localStorage.getItem(HISTORY_KEY);
+        if (storedHistory) { try { state.history = JSON.parse(storedHistory); } catch(e) {} }
+        else state.history = [];
+    }
+    function saveSession() { localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...state, history: undefined })); }
+    function saveHistory() { localStorage.setItem(HISTORY_KEY, JSON.stringify(state.history)); }
+
+    // ---------- UNIVERSAL TREND COMPUTATION (EMA + PREV CANDLE) ----------
+    function computeTrendFromData(item, has1h = false) {
+        if (!item.price || !item.ema20 || !item.ema50 || !item.prevClose || !item.prevOpen) return "neutral";
+        let price = parseFloat(item.price), ema20 = parseFloat(item.ema20), ema50 = parseFloat(item.ema50);
+        let prevBullish = item.prevClose > item.prevOpen;
+        let prevBearish = item.prevClose < item.prevOpen;
+        let emaBullish = ema20 > ema50;
+        let emaBearish = ema50 > ema20;
+        let priceAboveBoth = price > ema20 && price > ema50;
+        let priceBelowBoth = price < ema20 && price < ema50;
+        let priceBetween = (price > Math.min(ema20,ema50) && price < Math.max(ema20,ema50));
+        let scenario = "";
+        if (emaBullish && priceAboveBoth) scenario = "strong_uptrend";
+        else if (emaBullish && priceBetween) scenario = "uptrend_pullback";
+        else if (emaBullish && priceBelowBoth) scenario = "deep_pullback_bull";
+        else if (emaBearish && priceBelowBoth) scenario = "strong_downtrend";
+        else if (emaBearish && priceBetween) scenario = "downtrend_pullback";
+        else if (emaBearish && priceAboveBoth) scenario = "deep_pullback_bear";
+        else scenario = "sideways";
+        const biasMap = {
+            strong_uptrend: prevBullish ? "bullish" : "bullish_mild",
+            uptrend_pullback: prevBullish ? "bullish_mild" : "neutral_wait",
+            deep_pullback_bull: "bullish",
+            strong_downtrend: prevBearish ? "bearish" : "bearish_mild",
+            downtrend_pullback: prevBearish ? "bearish_mild" : "neutral_wait",
+            deep_pullback_bear: "bearish",
+            sideways: "neutral"
+        };
+        let raw = biasMap[scenario] || "neutral";
+        if (raw.includes("bullish")) return "bullish";
+        if (raw.includes("bearish")) return "bearish";
+        return "neutral";
+    }
+
+    // ---------- NEWS AUTO SURPRISE (NO EXTRA TEXT) ----------
+    function computeSurprise(actual, forecast, dataType) {
+        let act = parseFloat(actual), fc = parseFloat(forecast);
+        if (isNaN(act) || isNaN(fc)) return "neutral";
+        if (dataType === "unemployment") return act < fc ? "bullish" : (act > fc ? "bearish" : "neutral");
+        else return act > fc ? "bullish" : (act < fc ? "bearish" : "neutral");
+    }
+
+    function getNewsBias(currency) {
+        let items = state.news.filter(n => n.currency === currency);
+        if (items.length === 0) return "neutral";
+        let hasBullish = items.some(i => i.surprise === "bullish");
+        let hasBearish = items.some(i => i.surprise === "bearish");
+        if (hasBullish && !hasBearish) return "bullish";
+        if (hasBearish && !hasBullish) return "bearish";
+        return "neutral";
+    }
+
+    // ---------- SIGNAL LOGIC (USING COMPUTED TRENDS) ----------
+    function computeEURUSD() {
+        let dxyBias = computeTrendFromData(state.dxy);
+        let dxy1h = state.dxy.trend1h;
+        let eurBias = getNewsBias("EUR");
+        if (dxyBias === "bullish" && dxy1h === "bullish") return { signal: "SELL", reason: "DXY daily+1H bullish → USD strong", action: "SELL EURUSD" };
+        if (dxyBias === "bearish" && dxy1h === "bearish") return { signal: "BUY", reason: "DXY bearish both → USD weak", action: "BUY EURUSD" };
+        if (dxyBias === "bullish" && dxy1h === "bearish") return { signal: "WAIT", reason: "Daily bullish lekin 1H pullback", action: "WAIT", wait: "DXY 1H ko PDH ke upar close hone do, tab SELL karo." };
+        if (dxyBias === "bearish" && dxy1h === "bullish") return { signal: "WAIT", reason: "Daily bearish lekin 1H bounce", action: "WAIT", wait: "DXY 1H ko PDL ke neeche close hone do, tab BUY karo." };
+        if (eurBias === "bullish" && dxyBias !== "bullish") return { signal: "BUY", reason: "Euro news strong + DXY bearish/neutral", action: "BUY EURUSD" };
+        if (eurBias === "bearish" && dxyBias !== "bearish") return { signal: "SELL", reason: "Euro weak data", action: "SELL EURUSD" };
+        return { signal: "LEAVE IT", reason: "Mixed signals, koi clarity nahi", action: "LEAVE IT", wait: "Aaj trade mat karo, side raho." };
+    }
+    function computeGBPUSD() {
+        let dxyBias = computeTrendFromData(state.dxy);
+        let gbpFinal = (getNewsBias("GBP") === "bullish" || state.boe === "hawkish") ? "bullish" : ((getNewsBias("GBP") === "bearish" || state.boe === "dovish") ? "bearish" : "neutral");
+        let usdFinal = getNewsBias("USD");
+        if (dxyBias === "bearish") return { signal: "BUY", reason: "DXY bearish → GBPUSD up", action: "BUY GBPUSD" };
+        if (dxyBias === "bullish" && (gbpFinal === "bearish" || usdFinal === "bullish")) return { signal: "SELL", reason: "DXY bullish + GBP weak", action: "SELL GBPUSD" };
+        if (dxyBias === "bullish" && gbpFinal === "bullish") return { signal: "WAIT", reason: "DXY bullish lekin GBP bhi strong", action: "WAIT", wait: "NY open dekho, agar DXY apna high todta hai toh SELL, warna LEAVE." };
+        if (dxyBias === "neutral" && gbpFinal === "bullish") return { signal: "MILD BUY", reason: "GBP positive, DXY flat", action: "BUY (small)", wait: "Wait for DXY to break PDL for confirmation." };
+        return { signal: "LEAVE IT", reason: "Koi clear signal nahi", action: "LEAVE IT", wait: "Side raho, DXY ka trend aane do." };
+    }
+    function computeUSDJPY() {
+        let dxyBias = computeTrendFromData(state.dxy), dxy1h = state.dxy.trend1h;
+        let vix = state.vix.level;
+        let boj = state.boj;
+        let panic = vix === ">30", riskOn = vix === "<15", riskOff = (vix === ">20" || vix === ">25");
+        if (panic) return { signal: "STRONG SELL", reason: "VIX >30 panic → JPY safe haven", action: "SELL USDJPY" };
+        if (dxyBias === "bullish" && dxy1h === "bullish" && riskOn) return { signal: "STRONG BUY", reason: "DXY double bullish + risk-on", action: "BUY USDJPY" };
+        if (dxyBias === "bullish" && dxy1h === "bullish" && vix === "15-20") return { signal: "BUY", reason: "DXY alignment", action: "BUY USDJPY" };
+        if (dxyBias === "bullish" && riskOff) return { signal: "WAIT", reason: "VIX high, JPY safe haven", action: "WAIT", wait: "VIX <20 hone do ya DXY daily high break kare tab BUY." };
+        if (dxyBias === "bearish" && dxy1h === "bearish" && riskOff) return { signal: "STRONG SELL", reason: "DXY bearish + risk-off", action: "SELL USDJPY" };
+        if (boj === "hawkish" && (dxyBias === "bearish" || riskOff)) return { signal: "SELL", reason: "BOJ hawkish = JPY strong", action: "SELL USDJPY" };
+        if (boj === "dovish" && dxyBias === "bullish") return { signal: "BUY", reason: "BOJ dovish + DXY bullish", action: "BUY USDJPY" };
+        return { signal: "LEAVE IT", reason: "Conflicting signals", action: "LEAVE IT", wait: "VIX aur DXY dono ka clear signal chahiye." };
+    }
+    function computeGBPJPY() {
+        let spxBias = computeTrendFromData(state.spx);
+        let vix = state.vix.level;
+        let gbpFinal = (getNewsBias("GBP") === "bullish" || state.boe === "hawkish") ? "bullish" : ((getNewsBias("GBP") === "bearish" || state.boe === "dovish") ? "bearish" : "neutral");
+        let panic = vix === ">30";
+        let riskOn = (spxBias === "bullish" && (vix === "<15" || vix === "15-20"));
+        let riskOff = (spxBias === "bearish" && (vix === ">20" || vix === ">25"));
+        if (panic) return { signal: "STRONG SELL", reason: "Panic VIX → JPY extreme demand", action: "SELL GBPJPY" };
+        if (riskOn && gbpFinal === "bullish") return { signal: "STRONG BUY", reason: "Risk-on + GBP hawkish", action: "BUY GBPJPY" };
+        if (riskOff && gbpFinal === "bearish") return { signal: "STRONG SELL", reason: "Risk-off + GBP dovish", action: "SELL GBPJPY" };
+        if (riskOn && gbpFinal !== "bullish") return { signal: "MILD BUY", reason: "Risk-on dominates", action: "BUY (small)", wait: "SPX ko high maintain karna chahiye." };
+        if (state.boj === "hawkish") return { signal: "SELL", reason: "BOJ hawkish = yen strong", action: "SELL GBPJPY" };
+        return { signal: "LEAVE IT", reason: "No clear risk-GBP consensus", action: "LEAVE IT", wait: "VIX <15 ya >20 ka signal chahiye." };
+    }
+    function computeXAUUSD() {
+        let dxyBias = computeTrendFromData(state.dxy);
+        let us10yBias = computeTrendFromData(state.us10y);
+        let vix = state.vix.level;
+        if (vix === ">30") return { signal: "MILD BUY", reason: "Panic safe-haven", action: "BUY (small gold)", wait: "Partial position only." };
+        if (dxyBias === "bearish" && us10yBias === "bearish") return { signal: "BUY", reason: "DXY bearish + falling yields", action: "BUY XAUUSD" };
+        if (dxyBias === "bearish" && us10yBias !== "bullish") return { signal: "MILD BUY", reason: "USD weakness", action: "BUY XAUUSD" };
+        if (dxyBias === "bullish" && us10yBias === "bullish") return { signal: "SELL", reason: "DXY up + rising yields", action: "SELL XAUUSD" };
+        if ((vix === ">20" || vix === ">25") && dxyBias !== "bullish") return { signal: "BUY", reason: "Risk-off gold bid", action: "BUY XAUUSD" };
+        return { signal: "LEAVE IT", reason: "Gold conflicting signals", action: "LEAVE IT", wait: "DXY clear trend ya VIX >25 ka intezaar karo." };
+    }
+    function computeCrypto() {
+        let spxBias = computeTrendFromData(state.spx);
+        let vix = state.vix.level;
+        let btcdBias = computeTrendFromData(state.btcd);
+        let panic = vix === ">30";
+        let riskOn = (spxBias === "bullish" && (vix === "<15" || vix === "15-20"));
+        let riskOff = (vix === ">20" || vix === ">25");
+        if (panic) return { signal: "AVOID", reason: "Extreme panic", action: "LEAVE IT", wait: "Sideline crypto" };
+        if (riskOn && btcdBias === "bullish") return { signal: "BUY BTC", reason: "Risk-on + BTC.D rising", action: "BUY BITCOIN" };
+        if (riskOn && btcdBias === "bearish") return { signal: "BUY ETH", reason: "Risk-on + BTC.D falling", action: "BUY ETHEREUM" };
+        if (riskOff) return { signal: "SELL/WAIT", reason: "Risk-off heavy", action: "LEAVE IT", wait: "Wait for VIX <20" };
+        return { signal: "NEUTRAL", reason: "No clear edge", action: "LEAVE IT", wait: "Monitor SPX and BTCD" };
+    }
+
+    // ---------- RENDER SECTIONS ----------
+    function renderHome() {
+        const hasSession = localStorage.getItem(STORAGE_KEY) !== null;
+        return `<div class="premium-card" style="text-align: center; padding: 2.5rem;">
+            <h1 style="font-size: 2.2rem; margin-bottom: 0.8rem;">⚡ Welcome, Trader</h1>
+            <p style="color: #c0c9dd; margin-bottom: 2rem;">News + Full Intermarket (EMA + OHLC) → Institutional Bias</p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <button id="startFreshBtn" class="btn btn-gold">🚀 Let's Rock Today</button>
+                ${hasSession ? '<button id="resumeSessionBtn" class="btn btn-outline">⟳ Resume Session</button>' : ''}
+                <button id="viewHistoryHomeBtn" class="btn btn-outline">📜 View History</button>
+            </div>
+        </div>`;
+    }
+
+    function renderNews() {
+        let html = `<div><div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;"><h2>📰 News & Central Bank</h2><button id="showAddNewsForm" class="btn btn-gold">+ Add News</button></div>`;
+        if (state.news.length === 0) html += `<div class="premium-card">No news added. Click "Add News" → fill currency, actual, forecast, previous → system auto detects bullish/bearish surprise.</div>`;
+        else {
+            state.news.forEach((item, idx) => {
+                html += `<div class="premium-card"><div style="display: flex; justify-content: space-between;"><strong>${item.currency} - ${item.event}</strong><button class="removeNews" data-idx="${idx}" style="background: none; border: none; color: #f87171; cursor: pointer;">🗑️</button></div>
+                <div class="grid-2"><div>Actual: ${item.actual}</div><div>Forecast: ${item.forecast}</div><div>Previous: ${item.previous}</div><div>Surprise: <span style="color: ${item.surprise==='bullish'?'#4ade80':(item.surprise==='bearish'?'#f87171':'#facc15')}">${item.surprise.toUpperCase()}</span></div></div></div>`;
+            });
+        }
+        html += `<div id="addNewsForm" style="display: none;" class="premium-card"><h3>📌 Add Currency News (System auto-calculates surprise)</h3>
+        <div class="grid-2">
+            <select id="newsCurrency"><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="JPY">JPY</option></select>
+            <input type="text" id="newsEvent" placeholder="Event (CPI, NFP, GDP)" value="CPI">
+            <input type="text" id="newsActual" placeholder="Actual value" value="0.3%">
+            <input type="text" id="newsForecast" placeholder="Forecast" value="0.2%">
+            <input type="text" id="newsPrevious" placeholder="Previous" value="0.1%">
+            <select id="newsDataType"><option value="normal">Normal (higher = hawkish)</option><option value="unemployment">Unemployment (lower = hawkish)</option></select>
+        </div>
+        <button id="confirmAddNews" class="btn btn-gold" style="margin-top: 1rem;">✅ Auto-Surprise & Add</button></div>`;
+        html += `<div class="premium-card"><label>🏦 Bank of England (BOE)</label><select id="boeSelect"><option ${state.boe==='neutral'?'selected':''} value="neutral">Neutral</option><option ${state.boe==='hawkish'?'selected':''} value="hawkish">Hawkish (GBP strong)</option><option ${state.boe==='dovish'?'selected':''} value="dovish">Dovish (GBP weak)</option></select>
+        <label style="margin-top: 1rem;">🏯 Bank of Japan (BOJ)</label><select id="bojSelect"><option ${state.boj==='neutral'?'selected':''} value="neutral">Neutral</option><option ${state.boj==='hawkish'?'selected':''} value="hawkish">Hawkish (JPY strong)</option><option ${state.boj==='dovish'?'selected':''} value="dovish">Dovish (JPY weak)</option></select></div>
+        <div style="display: flex; justify-content: flex-end;"><button id="newsNextBtn" class="btn btn-gold">Next → Indicators</button></div></div>`;
+        document.getElementById("contentArea").innerHTML = html;
+        document.getElementById("showAddNewsForm")?.addEventListener("click", () => { document.getElementById("addNewsForm").style.display = "block"; });
+        document.getElementById("confirmAddNews")?.addEventListener("click", () => {
+            let currency = document.getElementById("newsCurrency").value;
+            let event = document.getElementById("newsEvent").value;
+            let actual = document.getElementById("newsActual").value;
+            let forecast = document.getElementById("newsForecast").value;
+            let previous = document.getElementById("newsPrevious").value;
+            let dataType = document.getElementById("newsDataType").value;
+            let surprise = computeSurprise(actual, forecast, dataType);
+            state.news.push({ id: Date.now(), currency, event, actual, forecast, previous, surprise, dataType });
+            saveSession();
+            renderNews();
+        });
+        document.querySelectorAll(".removeNews").forEach(btn => btn.addEventListener("click", (e) => { let idx = parseInt(btn.dataset.idx); state.news.splice(idx,1); saveSession(); renderNews(); }));
+        document.getElementById("boeSelect")?.addEventListener("change", (e) => { state.boe = e.target.value; saveSession(); });
+        document.getElementById("bojSelect")?.addEventListener("change", (e) => { state.boj = e.target.value; saveSession(); });
+        document.getElementById("newsNextBtn")?.addEventListener("click", () => { state.currentScreen = "indicators"; saveSession(); render(); });
+    }
+
+    function renderIndicators() {
+        const steps = [
+            "DXY (20/50 EMA + OHLC + 1H Trend)",
+            "S&P500 (20/50 EMA + OHLC)",
+            "US10Y (20/50 EMA + OHLC)",
+            "BTC.Dominance (20/50 EMA + OHLC)",
+            "VIX Level (simple)"
+        ];
+        const step = state.indicatorStep;
+        let html = `<div class="premium-card"><h3>📊 ${steps[step]}</h3>`;
+        if (step === 0) {
+            let d = state.dxy;
+            html += `<div class="grid-2"><div><label>Current Price</label><input type="number" step="0.01" id="dxyPrice" value="${d.price}"></div>
+            <div><label>20 EMA</label><input type="number" step="0.01" id="dxyEma20" value="${d.ema20}"></div>
+            <div><label>50 EMA</label><input type="number" step="0.01" id="dxyEma50" value="${d.ema50}"></div>
+            <div><label>Prev Day Open</label><input type="number" step="0.01" id="dxyOpen" value="${d.prevOpen}"></div>
+            <div><label>Prev Day High (PDH)</label><input type="number" step="0.01" id="dxyHigh" value="${d.prevHigh}"></div>
+            <div><label>Prev Day Low (PDL)</label><input type="number" step="0.01" id="dxyLow" value="${d.prevLow}"></div>
+            <div><label>Prev Day Close</label><input type="number" step="0.01" id="dxyClose" value="${d.prevClose}"></div>
+            <div><label>DXY 1H Trend</label><select id="dxy1h"><option ${d.trend1h==='bullish'?'selected':''} value="bullish">Bullish ▲</option><option ${d.trend1h==='bearish'?'selected':''} value="bearish">Bearish ▼</option><option ${d.trend1h==='side'?'selected':''} value="side">Sideways</option></select></div></div>`;
+        } else if (step === 1) {
+            let s = state.spx;
+            html += `<div class="grid-2"><div><label>Current Price</label><input type="number" step="0.01" id="spxPrice" value="${s.price}"></div>
+            <div><label>20 EMA</label><input type="number" step="0.01" id="spxEma20" value="${s.ema20}"></div>
+            <div><label>50 EMA</label><input type="number" step="0.01" id="spxEma50" value="${s.ema50}"></div>
+            <div><label>Prev Day Open</label><input type="number" step="0.01" id="spxOpen" value="${s.prevOpen}"></div>
+            <div><label>Prev Day High</label><input type="number" step="0.01" id="spxHigh" value="${s.prevHigh}"></div>
+            <div><label>Prev Day Low</label><input type="number" step="0.01" id="spxLow" value="${s.prevLow}"></div>
+            <div><label>Prev Day Close</label><input type="number" step="0.01" id="spxClose" value="${s.prevClose}"></div></div>`;
+        } else if (step === 2) {
+            let u = state.us10y;
+            html += `<div class="grid-2"><div><label>Current Yield</label><input type="number" step="0.01" id="us10yPrice" value="${u.price}"></div>
+            <div><label>20 EMA</label><input type="number" step="0.01" id="us10yEma20" value="${u.ema20}"></div>
+            <div><label>50 EMA</label><input type="number" step="0.01" id="us10yEma50" value="${u.ema50}"></div>
+            <div><label>Prev Day Open</label><input type="number" step="0.01" id="us10yOpen" value="${u.prevOpen}"></div>
+            <div><label>Prev Day High</label><input type="number" step="0.01" id="us10yHigh" value="${u.prevHigh}"></div>
+            <div><label>Prev Day Low</label><input type="number" step="0.01" id="us10yLow" value="${u.prevLow}"></div>
+            <div><label>Prev Day Close</label><input type="number" step="0.01" id="us10yClose" value="${u.prevClose}"></div></div>`;
+        } else if (step === 3) {
+            let b = state.btcd;
+            html += `<div class="grid-2"><div><label>Current BTC.D</label><input type="number" step="0.01" id="btcdPrice" value="${b.price}"></div>
+            <div><label>20 EMA</label><input type="number" step="0.01" id="btcdEma20" value="${b.ema20}"></div>
+            <div><label>50 EMA</label><input type="number" step="0.01" id="btcdEma50" value="${b.ema50}"></div>
+            <div><label>Prev Day Open</label><input type="number" step="0.01" id="btcdOpen" value="${b.prevOpen}"></div>
+            <div><label>Prev Day High</label><input type="number" step="0.01" id="btcdHigh" value="${b.prevHigh}"></div>
+            <div><label>Prev Day Low</label><input type="number" step="0.01" id="btcdLow" value="${b.prevLow}"></div>
+            <div><label>Prev Day Close</label><input type="number" step="0.01" id="btcdClose" value="${b.prevClose}"></div></div>`;
+        } else if (step === 4) {
+            html += `<div><label>VIX Level</label><select id="vixLevel"><option ${state.vix.level==='<15'?'selected':''} value="<15">&lt;15 (Risk On)</option><option ${state.vix.level==='15-20'?'selected':''} value="15-20">15-20 (Neutral)</option><option ${state.vix.level==='>20'?'selected':''} value=">20">&gt;20 (Risk Off)</option><option ${state.vix.level==='>25'?'selected':''} value=">25">&gt;25 (High Fear)</option><option ${state.vix.level==='>30'?'selected':''} value=">30">PANIC &gt;30</option></select></div>`;
+        }
+        html += `<div style="display: flex; justify-content: space-between; margin-top: 2rem;"><button id="prevIndBtn" class="btn" ${step===0?'disabled style="opacity:0.5"':''}>← Back</button>
+        <button id="nextIndBtn" class="btn btn-gold">${step===4?'Finish → Signals':'Next →'}</button></div></div>`;
+        document.getElementById("contentArea").innerHTML = html;
+        if (step === 0) {
+            ["dxyPrice","dxyEma20","dxyEma50","dxyOpen","dxyHigh","dxyLow","dxyClose"].forEach(id => {
+                document.getElementById(id)?.addEventListener("input", (e) => { state.dxy[id.replace('dxy','').toLowerCase()] = e.target.value; saveSession(); });
+            });
+            document.getElementById("dxy1h")?.addEventListener("change", (e) => { state.dxy.trend1h = e.target.value; saveSession(); });
+        } else if (step === 1) {
+            ["spxPrice","spxEma20","spxEma50","spxOpen","spxHigh","spxLow","spxClose"].forEach(id => {
+                document.getElementById(id)?.addEventListener("input", (e) => { state.spx[id.replace('spx','').toLowerCase()] = e.target.value; saveSession(); });
+            });
+        } else if (step === 2) {
+            ["us10yPrice","us10yEma20","us10yEma50","us10yOpen","us10yHigh","us10yLow","us10yClose"].forEach(id => {
+                document.getElementById(id)?.addEventListener("input", (e) => { state.us10y[id.replace('us10y','').toLowerCase()] = e.target.value; saveSession(); });
+            });
+        } else if (step === 3) {
+            ["btcdPrice","btcdEma20","btcdEma50","btcdOpen","btcdHigh","btcdLow","btcdClose"].forEach(id => {
+                document.getElementById(id)?.addEventListener("input", (e) => { state.btcd[id.replace('btcd','').toLowerCase()] = e.target.value; saveSession(); });
+            });
+        } else if (step === 4) {
+            document.getElementById("vixLevel")?.addEventListener("change", (e) => { state.vix.level = e.target.value; saveSession(); });
+        }
+        document.getElementById("prevIndBtn")?.addEventListener("click", () => { if(state.indicatorStep>0) state.indicatorStep--; saveSession(); renderIndicators(); });
+        document.getElementById("nextIndBtn")?.addEventListener("click", () => {
+            if(state.indicatorStep < 4) { state.indicatorStep++; saveSession(); renderIndicators(); }
+            else { state.currentScreen = "signals"; saveSession(); render(); }
+        });
+    }
+
+    function renderSignals() {
+        const eur = computeEURUSD(); const gbp = computeGBPUSD(); const usdjpy = computeUSDJPY();
+        const gbpjpy = computeGBPJPY(); const xau = computeXAUUSD(); const crypto = computeCrypto();
+        const all = { "EURUSD":eur, "GBPUSD":gbp, "USDJPY":usdjpy, "GBPJPY":gbpjpy, "XAUUSD":xau, "BTC/ETH":crypto };
+        const order = { "STRONG BUY":1, "BUY":2, "MILD BUY":3, "STRONG SELL":4, "SELL":5, "MILD SELL":6, "WAIT":7, "LEAVE IT":8, "NEUTRAL":9, "AVOID":10 };
+        const sorted = Object.entries(all).sort((a,b) => (order[a[1].signal.split(' ')[0]] || 99) - (order[b[1].signal.split(' ')[0]] || 99));
+        let dxyBias = computeTrendFromData(state.dxy);
+        let spxBias = computeTrendFromData(state.spx);
+        let us10yBias = computeTrendFromData(state.us10y);
+        let btcdBias = computeTrendFromData(state.btcd);
+        let summaryHtml = `<div class="indicator-summary">
+            <div class="summary-chip">DXY: ${dxyBias==='bullish'?'▲ BULLISH':(dxyBias==='bearish'?'▼ BEARISH':'➡️ SIDEWAYS')}</div>
+            <div class="summary-chip">S&P: ${spxBias==='bullish'?'▲ BULLISH':(spxBias==='bearish'?'▼ BEARISH':'➡️ NEUTRAL')}</div>
+            <div class="summary-chip">US10Y: ${us10yBias==='bullish'?'📈 RISING':(us10yBias==='bearish'?'📉 FALLING':'➡️ FLAT')}</div>
+            <div class="summary-chip">BTC.D: ${btcdBias==='bullish'?'▲ BTC':(btcdBias==='bearish'?'▼ ETH':'➡️ FLAT')}</div>
+            <div class="summary-chip">VIX: ${state.vix.level}</div>
+        </div><div id="signalsList"></div><div style="display: flex; gap: 1rem; justify-content: space-between; margin-top: 1.5rem;"><button id="backToIndicatorsBtn" class="btn">← Back</button>
+        <button id="saveBiasBtn" class="btn btn-gold">💾 Save Today's Bias</button><button id="exportSignalsBtn" class="btn btn-outline">📥 Export Report</button></div>`;
+        document.getElementById("contentArea").innerHTML = summaryHtml;
+        const signalsContainer = document.getElementById("signalsList");
+        signalsContainer.innerHTML = sorted.map(([name, data]) => {
+            let sigClass = data.signal.includes("STRONG BUY") ? "signal-strong-buy" : data.signal.includes("BUY") ? "signal-buy" : data.signal.includes("STRONG SELL") ? "signal-strong-sell" : data.signal.includes("SELL") ? "signal-sell" : "signal-wait";
+            let actionDisplay = data.action === "BUY" ? "✅ BUY" : (data.action === "SELL" ? "🔻 SELL" : (data.action === "LEAVE IT" ? "⏸️ LEAVE IT" : data.action));
+            return `<div class="signal-box ${sigClass}"><div style="display: flex; justify-content: space-between;"><strong>${name}</strong><span>${data.signal}</span></div><div class="text-sm">${data.reason}</div>${data.wait ? `<div class="text-amber-300 text-xs mt-1">⏳ ${data.wait}</div>` : ''}<div class="text-green-300 text-xs mt-1 font-semibold">🎯 ACTION: ${actionDisplay}</div></div>`;
+        }).join('');
+        document.getElementById("backToIndicatorsBtn")?.addEventListener("click", () => { state.currentScreen = "indicators"; saveSession(); render(); });
+        document.getElementById("saveBiasBtn")?.addEventListener("click", () => {
+            let today = new Date().toISOString().slice(0,10);
+            let signalsCopy = { eur: eur.signal, gbp: gbp.signal, usdjpy: usdjpy.signal, gbpjpy: gbpjpy.signal, xau: xau.signal, crypto: crypto.signal };
+            state.history.unshift({ date: today, signals: signalsCopy, dxyBias, spxBias, us10yBias, btcdBias, vix: state.vix.level, newsSummary: state.news.map(n=>n.currency+":"+n.surprise).join(","), feedback: "Pending" });
+            saveHistory();
+            document.getElementById("contentArea").classList.add("flash-save");
+            setTimeout(() => document.getElementById("contentArea").classList.remove("flash-save"), 600);
+            alert("✅ Bias saved to history!");
+        });
+        document.getElementById("exportSignalsBtn")?.addEventListener("click", () => {
+            let report = `GARRION BIAS REPORT - ${new Date().toLocaleString()}\n\nDXY:${dxyBias} | SPX:${spxBias} | US10Y:${us10yBias} | BTC.D:${btcdBias} | VIX:${state.vix.level}\n\n` + sorted.map(([name,data]) => `${name}: ${data.signal} | ${data.reason} | Action: ${data.action}`).join("\n");
+            const blob = new Blob([report], {type: "text/plain"});
+            const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `garrion_bias_${new Date().toISOString().slice(0,10)}.txt`; link.click(); URL.revokeObjectURL(link.href);
+        });
+    }
+
+    function renderHistory() {
+        let html = `<div><div style="display: flex; justify-content: space-between; margin-bottom: 1rem;"><h2>📜 Bias History & Review</h2><button id="exportMonthlyBtn" class="btn btn-outline">📎 Export JSON</button><button id="exportTxtBtn" class="btn btn-outline">📄 Export TXT</button></div>`;
+        if (state.history.length === 0) html += `<div class="premium-card">No saved biases yet.</div>`;
+        else {
+            state.history.forEach((entry, idx) => {
+                html += `<div class="history-entry"><div><strong>📅 ${entry.date}</strong> | DXY: ${entry.dxyBias} | SPX:${entry.spxBias} | US10Y:${entry.us10yBias} | BTC.D:${entry.btcdBias} | VIX:${entry.vix}</div><div class="text-xs">EUR:${entry.signals.eur} GBP:${entry.signals.gbp} USDJPY:${entry.signals.usdjpy} GBPJPY:${entry.signals.gbpjpy} XAU:${entry.signals.xau} Crypto:${entry.signals.crypto}</div><div><button class="markRight" data-idx="${idx}" style="background:#10b98120; border:1px solid #10b981; padding: 0.2rem 0.8rem; border-radius: 1rem;">✅ Right</button> <button class="markWrong" data-idx="${idx}" style="background:#f43f5e20; border:1px solid #f43f5e; padding: 0.2rem 0.8rem; border-radius: 1rem;">❌ Wrong</button> <span id="feedback-${idx}" style="margin-left: 0.5rem;">${entry.feedback || 'Not reviewed'}</span></div></div>`;
+            });
+        }
+        html += `<div style="margin-top: 1rem;"><button id="backToSignalsFromHistory" class="btn btn-gold">← Back to Signals</button></div></div>`;
+        document.getElementById("contentArea").innerHTML = html;
+        document.querySelectorAll(".markRight").forEach(btn => btn.addEventListener("click", (e) => { let idx = parseInt(btn.dataset.idx); state.history[idx].feedback = "✅ Right bias"; saveHistory(); renderHistory(); }));
+        document.querySelectorAll(".markWrong").forEach(btn => btn.addEventListener("click", (e) => { let idx = parseInt(btn.dataset.idx); state.history[idx].feedback = "❌ Wrong bias"; saveHistory(); renderHistory(); }));
+        document.getElementById("exportMonthlyBtn")?.addEventListener("click", () => { let data = JSON.stringify(state.history, null, 2); let blob = new Blob([data], {type:"application/json"}); let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `garrion_history_${new Date().toISOString().slice(0,7)}.json`; a.click(); URL.revokeObjectURL(a.href); });
+        document.getElementById("exportTxtBtn")?.addEventListener("click", () => { let txt = state.history.map(h => `${h.date} | DXY:${h.dxyBias} | EUR:${h.signals.eur} ...`).join("\n"); let blob = new Blob([txt], {type:"text/plain"}); let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `garrion_report.txt`; a.click(); });
+        document.getElementById("backToSignalsFromHistory")?.addEventListener("click", () => { state.currentScreen = "signals"; saveSession(); render(); });
+    }
+
+    function render() {
+        if (state.currentScreen === "home") {
+            document.getElementById("navLinks").style.display = "none";
+            document.getElementById("contentArea").innerHTML = renderHome();
+            document.getElementById("startFreshBtn")?.addEventListener("click", () => { resetToFresh(); state.currentScreen = "news"; saveSession(); render(); });
+            document.getElementById("resumeSessionBtn")?.addEventListener("click", () => { state.currentScreen = "news"; saveSession(); render(); });
+            document.getElementById("viewHistoryHomeBtn")?.addEventListener("click", () => { state.currentScreen = "history"; saveSession(); render(); });
+        } else {
+            document.getElementById("navLinks").style.display = "flex";
+            if (state.currentScreen === "news") renderNews();
+            else if (state.currentScreen === "indicators") renderIndicators();
+            else if (state.currentScreen === "signals") renderSignals();
+            else if (state.currentScreen === "history") renderHistory();
+            document.querySelectorAll(".nav-btn").forEach(btn => {
+                btn.classList.remove("active");
+                if (btn.dataset.nav === state.currentScreen) btn.classList.add("active");
+                btn.addEventListener("click", () => { state.currentScreen = btn.dataset.nav; if(btn.dataset.nav === "indicators" && !state.indicatorStep) state.indicatorStep = 0; saveSession(); render(); });
+            });
+        }
+    }
+
+    function resetToFresh() {
+        state.news = []; state.boe = "neutral"; state.boj = "neutral";
+        state.dxy = { price: "", ema20: "", ema50: "", prevOpen: "", prevHigh: "", prevLow: "", prevClose: "", trend1h: "side" };
+        state.spx = { price: "", ema20: "", ema50: "", prevOpen: "", prevHigh: "", prevLow: "", prevClose: "" };
+        state.us10y = { price: "", ema20: "", ema50: "", prevOpen: "", prevHigh: "", prevLow: "", prevClose: "" };
+        state.btcd = { price: "", ema20: "", ema50: "", prevOpen: "", prevHigh: "", prevLow: "", prevClose: "" };
+        state.vix = { level: "<15" };
+        state.indicatorStep = 0;
+        saveSession();
+    }
+
+    loadSession();
+    render();
+</script>
+</body>
+</html>
